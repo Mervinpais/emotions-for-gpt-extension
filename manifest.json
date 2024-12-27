@@ -1,0 +1,28 @@
+{
+    "manifest_version": 2,
+    "name": "ChatGPT Emotion Banner",
+    "version": "1.0",
+    "description": "Changes the emotion banner on chatgpt.com based on the first sentence of ChatGPT replies.",
+    "icons": {
+      "48": "images/default.png"
+    },
+    "content_scripts": [
+      {
+        "matches": ["*://chatgpt.com/*"],
+        "js": ["contentScript.js"]
+      }
+    ],
+    "web_accessible_resources": [
+      "images/anger.png",
+      "images/curious.png",
+      "images/default.png",
+      "images/happy.png",
+      "images/love.png",
+      "images/mondo.png",
+      "images/scared.png",
+      "images/shock.png",
+      "images/sob.png",
+      "images/worried.png",
+      "images/noise.png"
+    ]
+    }
