@@ -1,63 +1,30 @@
 /* 
-  ========================
-   Overlay Container Style
-  ========================
+  Minimal styling: NO page background or global changes. 
+  ChatGPT remains exactly as is by default.
 */
+
+/* The overlay container at the top-center of the page */
 .emotion-overlay {
     position: fixed;
-    top: 20px; 
-    right: 20px; 
-    width: 400px; /* Slightly larger for a more pronounced look */
-    /* max-height: 300px; */
-    z-index: 10000;
-    
-    /* Glassmorphism-esque background */
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000; /* on top of everything else */
+  
+    /* Optional subtle background behind the image */
     background: rgba(255, 255, 255, 0.07);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   
-    /* Border & roundness */
+    /* Slight border and rounding */
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 14px;
-  
-    /* Subtle shadow for depth */
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-  
-    /* Intro animation (fade in & slight slide) */
-    animation: fadeInOverlay 0.6s ease-in-out;
-    overflow: hidden; /* Ensures child elements do not spill out */
+    border-radius: 10px;
+    padding: 4px;
   }
   
-  /* 
-    ========================
-     Overlay Image Style
-    ========================
-  */
+  /* Keep the image at its original size (no forced width or height) */
   .emotion-image {
-    width: 100%;
-    height: auto;
-    display: block; /* Remove default inline spacing */
-  
-    /* Optional subtle hover effect (just in case you want it) */
-    transition: transform 0.3s ease;
-  }
-  .emotion-image:hover {
-    transform: scale(1.03);
-  }
-  
-  /* 
-    ========================
-     Intro Animation Keyframes
-    ========================
-  */
-  @keyframes fadeInOverlay {
-    0% {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    display: block;
+    margin: 0 auto; /* center within container */
   }
   

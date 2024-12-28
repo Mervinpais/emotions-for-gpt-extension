@@ -1,26 +1,22 @@
-// Regex to match allowed domains: chat.openai.com or chatgpt.com
+// Regex matching chat.openai.com or chatgpt.com
 const allowedDomains = /^(.*\.)?(chat\.openai\.com|chatgpt\.com)$/i;
 
-// Only run if we're on an allowed domain
-if (allowedDomains.test(window.location.hostname)) {
+// Current displayed emotion image filename
+let currentEmotion = "default.gif";
 
-  // Ensure the script only runs once
-  if (!document.querySelector(".emotion-overlay")) {
-    // Create the overlay container
-    const container = document.createElement("div");
-    container.className = "emotion-overlay";
+/**
+ * A small helper to get the file name for the detected emotion in the latest message.
+ * Returns "default.gif" if no known emotion is found.
+ */
+function detectEmotion() {
+  const chatMessages = document.querySelectorAll(".markdown");
+  if (!chatMessages.length) return "default.gif";
 
-    // Create the image element
-    const img = document.createElement("img");
-    img.src = browser.runtime.getURL("images/default.png");
-    img.alt = "Emotion Not Detected";
-    img.className = "emotion-image";
+  // Get the text of the most recent ChatGPT reply
+  const latestMessage = chatMessages[chatMessages.length - 1];
+  const text = (latestMessage.textContent || "").toLowerCase();
 
-    container.appendChild(img);
-    document.body.appendChild(container);
-  }
-
-  // Define mappings from keywords to image filenames
+  // Simple mapping
   const emotionMappings = {
     sob: "sob.png",
     anger: "anger.png",
@@ -31,64 +27,96 @@ if (allowedDomains.test(window.location.hostname)) {
     shock: "shock.png",
     worried: "worried.png",
     curious: "curious.png",
-    // Add more if needed...
   };
 
-  /**
-   * Get the first sentence of the latest ChatGPT reply.
-   */
-  function getLatestReplyFirstSentence() {
-    // Get all ChatGPT reply containers
-    const chatMessages = document.querySelectorAll(".markdown");
-    if (!chatMessages.length) return null;
-
-    // Get the last message
-    const latestMessage = chatMessages[chatMessages.length - 1];
-
-    // Extract its text content
-    const textContent = latestMessage.textContent.trim();
-    if (!textContent) return null;
-
-    // Split into sentences, use the first one
-    // This is a naive approach that splits on '.' or '!' or '?'
-    const firstSentenceMatch = textContent.match(/[^.?!]+[.?!]/);
-    if (!firstSentenceMatch) return null;
-
-    return firstSentenceMatch[0].toLowerCase(); // Convert to lower for matching
-  }
-
-  /**
-   * Check the first sentence for known keywords
-   * and update the overlay image if matched.
-   */
-  function updateEmotionOverlay() {
-    const firstSentence = getLatestReplyFirstSentence();
-    if (!firstSentence) return;
-
-    let matchedImage = "default.png";
-
-    // Loop through our emotion mapping
-    for (let keyword in emotionMappings) {
-      if (firstSentence.includes(keyword)) {
-        matchedImage = emotionMappings[keyword];
-        break;
-      }
-    }
-
-    // Update the existing overlay image source
-    const overlayImg = document.querySelector(".emotion-image");
-    if (overlayImg) {
-      overlayImg.src = browser.runtime.getURL(`images/${matchedImage}`);
+  for (const keyword in emotionMappings) {
+    if (text.includes(keyword)) {
+      return emotionMappings[keyword];
     }
   }
+  return "default.gif";
+}
 
-  // MutationObserver to monitor new messages
+/**
+ * Transition from the current image -> default.gif -> newEmotion,
+ * with a short delay if we want an immediate/snappy effect.
+ * 
+ * @param {string} newEmotion  The filename of the new emotion
+ * @param {number} delay       Delay in ms before showing the new emotion
+ */
+function transitionEmotion(newEmotion, delay = 200) {
+  const overlayImg = document.querySelector(".emotion-image");
+  if (!overlayImg) return;
+
+  // Step 1: Immediately show default.gif
+  overlayImg.src = browser.runtime.getURL("images/default.gif");
+
+  // Step 2: After 'delay' ms, show the new emotion
+  setTimeout(() => {
+    overlayImg.src = browser.runtime.getURL(`images/${newEmotion}`);
+    currentEmotion = newEmotion;
+  }, delay);
+}
+
+/**
+ * Called whenever we suspect a new message has appeared.
+ * If there's a newly detected emotion, we transition immediately.
+ */
+function checkForNewEmotion() {
+  const latestDetected = detectEmotion();
+  if (latestDetected !== currentEmotion) {
+    // Quick transition
+    transitionEmotion(latestDetected, 200);
+  }
+}
+
+/**
+ * Every 4 seconds, do:
+ *   1) Check if there's a newly detected emotion -> immediate transition if found
+ *   2) If after that, we're still on a custom emotion (not default.gif),
+ *      do a short "blip" ( default.gif -> currentEmotion ) with a slower transition.
+ */
+function periodicBlip() {
+  // 1) Re-check for a new emotion right now
+  const latestDetected = detectEmotion();
+  if (latestDetected !== currentEmotion) {
+    // If something new is found, do an immediate 200ms transition
+    transitionEmotion(latestDetected, 200);
+    return;
+  }
+
+  // 2) If we remain on a non-default emotion, do the "blip"
+  if (currentEmotion !== "default.gif") {
+    // Slightly longer 1s transition for the periodic effect
+    transitionEmotion(currentEmotion, 1000);
+  }
+}
+
+if (allowedDomains.test(window.location.hostname)) {
+
+  // Inject only once
+  if (!document.querySelector(".emotion-overlay")) {
+    const container = document.createElement("div");
+    container.className = "emotion-overlay";
+
+    const img = document.createElement("img");
+    img.src = browser.runtime.getURL("images/default.gif");
+    img.alt = "Emotion Overlay";
+    img.className = "emotion-image";
+
+    container.appendChild(img);
+    document.body.appendChild(container);
+  }
+
+  // Watch for new messages
   const observer = new MutationObserver(() => {
-    updateEmotionOverlay();
+    checkForNewEmotion();
   });
-
   observer.observe(document.body, { childList: true, subtree: true });
 
-  // Check once on initial load
-  updateEmotionOverlay();
+  // Initial check
+  checkForNewEmotion();
+
+  // Periodic 4-second cycle
+  setInterval(periodicBlip, 4000);
 }
