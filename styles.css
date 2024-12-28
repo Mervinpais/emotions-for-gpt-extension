@@ -1,12 +1,63 @@
-/* Style for the image overlay */
+/* 
+  ========================
+   Overlay Container Style
+  ========================
+*/
 .emotion-overlay {
     position: fixed;
-    top: 20px; /* Adjust as needed */
-    right: 20px; /* Adjust as needed */
-    width: 500px; /* Increased size of the image */
-    z-index: 10000; /* Ensure it's above other elements */
-    border: 2px solid green; /* Optional border styling */
-    box-shadow: 0px 0px 10px 2px rgba(0, 255, 0, 0.8); /* Glowing effect */
-    background-color: black; /* Optional background to show behind the PNG */
+    top: 20px; 
+    right: 20px; 
+    width: 400px; /* Slightly larger for a more pronounced look */
+    /* max-height: 300px; */
+    z-index: 10000;
+    
+    /* Glassmorphism-esque background */
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  
+    /* Border & roundness */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+  
+    /* Subtle shadow for depth */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  
+    /* Intro animation (fade in & slight slide) */
+    animation: fadeInOverlay 0.6s ease-in-out;
+    overflow: hidden; /* Ensures child elements do not spill out */
+  }
+  
+  /* 
+    ========================
+     Overlay Image Style
+    ========================
+  */
+  .emotion-image {
+    width: 100%;
+    height: auto;
+    display: block; /* Remove default inline spacing */
+  
+    /* Optional subtle hover effect (just in case you want it) */
+    transition: transform 0.3s ease;
+  }
+  .emotion-image:hover {
+    transform: scale(1.03);
+  }
+  
+  /* 
+    ========================
+     Intro Animation Keyframes
+    ========================
+  */
+  @keyframes fadeInOverlay {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   

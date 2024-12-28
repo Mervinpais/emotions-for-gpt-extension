@@ -6,12 +6,18 @@ if (allowedDomains.test(window.location.hostname)) {
 
   // Ensure the script only runs once
   if (!document.querySelector(".emotion-overlay")) {
-    // Create the overlay image
+    // Create the overlay container
+    const container = document.createElement("div");
+    container.className = "emotion-overlay";
+
+    // Create the image element
     const img = document.createElement("img");
     img.src = browser.runtime.getURL("images/default.png");
     img.alt = "Emotion Not Detected";
-    img.className = "emotion-overlay";
-    document.body.appendChild(img);
+    img.className = "emotion-image";
+
+    container.appendChild(img);
+    document.body.appendChild(container);
   }
 
   // Define mappings from keywords to image filenames
@@ -30,8 +36,6 @@ if (allowedDomains.test(window.location.hostname)) {
 
   /**
    * Get the first sentence of the latest ChatGPT reply.
-   * This will vary based on ChatGPT’s DOM structure; we’ll assume
-   * that each new reply is placed in an element with class "markdown".
    */
   function getLatestReplyFirstSentence() {
     // Get all ChatGPT reply containers
@@ -72,29 +76,19 @@ if (allowedDomains.test(window.location.hostname)) {
     }
 
     // Update the existing overlay image source
-    const overlayImg = document.querySelector(".emotion-overlay");
+    const overlayImg = document.querySelector(".emotion-image");
     if (overlayImg) {
       overlayImg.src = browser.runtime.getURL(`images/${matchedImage}`);
     }
   }
 
-  // ----- OPTION 1: Use a MutationObserver to monitor new messages -----
-  // (Many dynamic sites add new messages inside a container with class "markdown" or a parent node)
-  const targetNode = document.body;
-  const observerOptions = { childList: true, subtree: true };
-
+  // MutationObserver to monitor new messages
   const observer = new MutationObserver(() => {
-    // When the DOM changes, try to detect the new message
     updateEmotionOverlay();
   });
 
-  observer.observe(targetNode, observerOptions);
+  observer.observe(document.body, { childList: true, subtree: true });
 
-  // ----- OPTION 2: Alternatively, you could poll for changes -----
-  // setInterval(() => {
-  //   updateEmotionOverlay();
-  // }, 3000);
-
-  // Immediately check once when the script loads
+  // Check once on initial load
   updateEmotionOverlay();
 }
