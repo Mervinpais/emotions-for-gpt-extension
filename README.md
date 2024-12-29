@@ -1,3 +1,10 @@
+# Important
+## This is not my repo, nor ORIGINAL code is mine, The main code belongs to node62 on github
+## Please go support him, he is epic :)
+
+----
+
+
 This is a simple firefox extension that adds a sprite overlay in chatGPT that changes according to the certain words in the response messages.
 
 The intent was to make the conversations feel more interactive.
